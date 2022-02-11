@@ -1,0 +1,3 @@
+FOLDER_PATH="__pycache__"
+ITBU="Blue"
+ENV="prod"

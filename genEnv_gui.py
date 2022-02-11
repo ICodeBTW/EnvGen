@@ -4,9 +4,11 @@ import genEnv as ge
 sg.theme('Reddit')
 
 ITBU_ALL = ['Green', 'Blue', 'Red']
-ASSET_LIST = ['credentials','secret key']
+ASSET_LIST = ['credentials','text','integer','boolean']
 ENV_LIST = ['dev','prod']
 FOLDER_LIST = ['default']
+data= [["name","type","value","description"]]
+
 
 
 def make_window1():
@@ -34,9 +36,25 @@ def make_window2():
 
 def make_window3():
     title = 'Asset Generation'
+    headings = [str(data[0][x])+'     ..' for x in range(len(data[0]))]
     layout = [ [sg.Titlebar(title, sg.CUSTOM_TITLEBAR_ICON)],
-               [sg.Text('Window 3')],
-               [sg.Button('< Prev'), sg.Button('Next >')]]
+               [sg.Text('Asset Generation')],
+               [sg.Table(values=data[1:][:], headings=headings, max_col_width=25,
+                        # background_color='light blue',
+                        auto_size_columns=True,
+                        display_row_numbers=True,
+                        justification='right',
+                        num_rows=5,
+                        alternating_row_color='lightblue',
+                        enable_click_events=True,
+                        key='-TABLE-',
+                        row_height=25,
+                        tooltip='Assets Table'), sg.Button('Add',key='-ADD-'),sg.Button('Remove',key='-REMOVE-')],
+               [sg.Text("Name"),sg.InputText(key="-NAME-"),sg.VerticalSeparator(pad=None),sg.Text("Type"),sg.Combo(ASSET_LIST,key="-TYPE-")],
+               [sg.Text("Value"), sg.InputText(key="-VALUE-"), sg.VerticalSeparator(pad=None), sg.Text("Description"),
+                sg.InputText(key="-DESC-")],
+               [sg.Button('< Prev'),sg.Button('Generate csv',key='-GEN-'),sg.Button('Next >')]]
+
     return  sg.Window(title, layout, resizable=True, no_titlebar=True, keep_on_top=True, margins=(0, 0), finalize=True)
 
 def make_window4():
@@ -102,6 +120,22 @@ def main():
             elif event in (sg.WIN_CLOSED, '< Prev'):
                 window3.hide()
                 window2.un_hide()
+            elif event == '-ADD-':
+                name,value,type,desc = values['-NAME-'],values['-VALUE-'],values['-TYPE-'],values['-DESC-']
+                data.append([name,value,type,desc])
+                print(data)
+                window['-TABLE-'].update(values=data[1:][:])
+            elif event[0] == '-TABLE-':
+                rowNum = event[2][0]
+            elif event == '-REMOVE-':
+                if rowNum is not None and  rowNum > -1 :
+                    data.pop(rowNum)
+                    window['-TABLE-'].update(values=data[1:][:])
+            elif event == '-GEN-':
+                ge.generate_csv_file(data)
+
+
+
 
         if window == window4:
             if event == '< Prev':
